@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product
@@ -7,14 +8,14 @@ from .serializers import ProductSerializer
 # Create your views here.
 @api_view()
 def product_list(request):
-    return Response('ok')
+    product_list = Product.objects.select_related('collection').all()
+    serializer = ProductSerializer(product_list, many=True)
+    return Response(serializer.data)
 
 @api_view()
 def products_detail(request, id):
-    try :
-        product = Product.objects.get(pk=id)
-        serializer = ProductSerializer(product) 
-        return Response(serializer.data)
-    except Product.DoesNotExist:
-        return Response(status=404)
+    product = get_object_or_404(Product, pk=id)
+    serializer = ProductSerializer(product) 
+    return Response(serializer.data)
+
         
