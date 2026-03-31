@@ -126,22 +126,38 @@ class CollectionList(ListCreateAPIView):
 #         serializer.save()
 #         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
+ 
+#  ---> class based view  __collection__
+
+class CollectionDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Collection.objects.annotate(
+            product_count=Count('products'))
+    serializer_class = CollectionSerializer
     
-@api_view(['GET', 'PUT', 'DELETE'])
-def collection_detail(request, pk):
-    collection = get_object_or_404(
-        Collection.object.annotate(
-            product_count=Count('products')), pk =pk)
-    if request.methos == 'GET':
-        serializer = CollectionSerializer(collection)
-        return Response(serializer.data)
-    elif request.method == 'PUT':
-        serializer = CollectionSerializer(collection, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(request.data)
-    elif request.method == 'DELETE':
+    def delete(self, request , pk):
+        collection = get_object_or_404(Collection, pk=pk)
         if collection.products.count() > 0 :
             return Response({'error': 'Collection cannot be deleted'})
         collection.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+ 
+ 
+#  ---> function based view   __collection__   
+# @api_view(['GET', 'PUT', 'DELETE'])
+# def collection_detail(request, pk):
+#     collection = get_object_or_404(
+#         Collection.object.annotate(
+#             product_count=Count('products')), pk =pk)
+#     if request.methos == 'GET':
+#         serializer = CollectionSerializer(collection)
+#         return Response(serializer.data)
+#     elif request.method == 'PUT':
+#         serializer = CollectionSerializer(collection, data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(request.data)
+#     elif request.method == 'DELETE':
+#         if collection.products.count() > 0 :
+#             return Response({'error': 'Collection cannot be deleted'})
+#         collection.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
