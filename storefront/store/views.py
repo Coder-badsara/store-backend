@@ -1,12 +1,11 @@
-from django.shortcuts import get_object_or_404
 from django.db.models import Count
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView , RetrieveUpdateDestroyAPIView
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
 from .filters import ProductFilter
 from .models import Product , Collection , OrderItem , Review
 from .serializers import ProductSerializer , CollectionSerializer , ReviewSerializer
@@ -17,8 +16,10 @@ from .serializers import ProductSerializer , CollectionSerializer , ReviewSerial
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
+    search_fields = ['title', 'description']
+    ordering_fields = ['price', 'last_updated']
     
     
     def get_serializer_context(self):
